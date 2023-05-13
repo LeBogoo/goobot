@@ -9,7 +9,6 @@ import (
 	"github.com/bwmarrin/discordgo"
 
 	"goobot/commandsystem"
-	"goobot/commandsystem/commands"
 	"goobot/envparser"
 )
 
@@ -33,20 +32,12 @@ func main() {
 	user, _ := dg.User("@me")
 	fmt.Printf("Bot is now running. Invite bot at https://discord.com/api/oauth2/authorize?client_id=%s&permissions=8&scope=bot\n", user.ID)
 
-	registerCommands(dg)
+	commandParser := commandsystem.NewCommandParser()
+	commandParser.RegisterCommandFiles(dg)
 
 	sc := make(chan os.Signal, 1)
 	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt, os.Kill)
 	<-sc
 
 	dg.Close()
-}
-
-func registerCommands(s *discordgo.Session) {
-	commandHandler := commandsystem.NewCommandhandler(s)
-
-	commandHandler.RegisterCommand(s, &commands.PingCommand{})
-	commandHandler.RegisterCommand(s, &commands.BlaCommand{})
-
-	s.AddHandler(commandHandler.HandleInteraction)
 }
